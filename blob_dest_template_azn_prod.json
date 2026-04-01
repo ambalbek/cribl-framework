@@ -1,0 +1,22 @@
+{
+  "type": "azure_blob",
+  "containerName": "",
+  "streamtags": [],
+  "environment": "prod",
+  "region": "northcentralus",
+  "storageAccountName": "prodstorageazn",
+  "authenticationMethod": "connectionString",
+  "connectionString": "DefaultEndpointsProtocol=https;AccountName=prodstorageazn;AccountKey=REPLACE_ME;EndpointSuffix=core.windows.net",
+  "partitionExpr": "`${host}/${sourcetype}`",
+  "format": "raw",
+  "compress": "gzip",
+  "maxFileSizeMB": 32,
+  "maxFileOpenTimeSec": 300,
+  "maxFileIdleTimeSec": 30,
+  "maxOpenFiles": 100,
+  "onBackpressure": "block",
+  "stagePath": "/tmp/cribl-staging",
+  "destPath": "",
+  "addIdToStagePath": true,
+  "removeEmptyDirs": false
+}

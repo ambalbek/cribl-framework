@@ -1,0 +1,99 @@
+{
+  "_comment": "Copy this file to config.json and fill in your values. config.json is gitignored.",
+
+  "base_url": "https://YOUR_CRIBL_HOST:9000",
+  "cribl_urls": [
+    "https://cribl-azn.example.com:9000",
+    "https://cribl-azs.example.com:9000"
+  ],
+  "elk_urls": [
+    "https://elk-azn.example.com:9200",
+    "https://elk-azs.example.com:9200"
+  ],
+  "skip_ssl": true,
+
+  "credentials": {
+    "_comment": "Use token OR username+password. Token takes priority if both are set. Leave fields blank to be prompted at runtime.",
+    "token": "",
+    "username": "",
+    "password": ""
+  },
+
+  "route_templates": {
+    "azn": "route_template_azn.json",
+    "azs": "route_template_azs.json"
+  },
+  "dest_prefixes": {
+    "azn": "hcsc-blob-storage-northcentralus",
+    "azs": "hcsc-blob-storage-southcentralus"
+  },
+  "snapshot_dir": "cribl_snapshots",
+  "min_existing_total_routes": 1,
+  "diff_lines": 3,
+
+  "workspaces": {
+    "dev": {
+      "worker_groups": [
+        "wg-dev-01", "wg-dev-02", "wg-dev-03", "wg-dev-04",
+        "wg-dev-05", "wg-dev-06", "wg-dev-07", "wg-dev-08",
+        "wg-dev-09", "wg-dev-10", "wg-dev-11", "wg-dev-12"
+      ],
+      "dest_templates": {
+        "azn": "blob_dest_template_azn_dev.json",
+        "azs": "blob_dest_template_azs_dev.json"
+      },
+      "description": "Development workspace"
+    },
+    "test": {
+      "worker_groups": [
+        "wg-test-01", "wg-test-02", "wg-test-03", "wg-test-04",
+        "wg-test-05", "wg-test-06", "wg-test-07", "wg-test-08",
+        "wg-test-09", "wg-test-10", "wg-test-11", "wg-test-12"
+      ],
+      "dest_templates": {
+        "azn": "blob_dest_template_azn_test.json",
+        "azs": "blob_dest_template_azs_test.json"
+      },
+      "description": "Test workspace"
+    },
+    "prod": {
+      "worker_groups": [
+        "wg-prod-01", "wg-prod-02", "wg-prod-03", "wg-prod-04",
+        "wg-prod-05", "wg-prod-06", "wg-prod-07", "wg-prod-08",
+        "wg-prod-09", "wg-prod-10", "wg-prod-11", "wg-prod-12"
+      ],
+      "dest_templates": {
+        "azn": "blob_dest_template_azn_prod.json",
+        "azs": "blob_dest_template_azs_prod.json"
+      },
+      "description": "Production workspace",
+      "require_allow": true
+    }
+  },
+
+  "_workspace_options_reference": {
+    "_comment": "Optional fields you can add to any workspace entry:",
+    "base_url": "overrides the global base_url for this workspace — use this to point to a different Cribl cluster",
+    "routes_table": "route table name used in GET/PATCH /routes/{routes_table} — defaults to \"default\" if omitted",
+    "skip_ssl": "true/false — overrides global skip_ssl for this workspace only",
+    "require_allow": "true — forces the user to type ALLOW before any writes",
+    "route_template": "path to a per-workspace route template override (skips region lookup)",
+    "dest_template": "path to a per-workspace dest template override (skips region lookup)",
+    "description": "human-readable label shown in the TARGET banner"
+  },
+
+  "admin_secret": "CHANGE_ME_TO_A_STRONG_RANDOM_STRING",
+
+  "iiq_url": "https://iiq.company.com/accessRequest",
+
+  "datastream": {
+    "_comment": "Elasticsearch datastream where onboarding requests are stored.",
+    "elk_url":  "https://elk.example.com:9200",
+    "token":    "",
+    "username": "",
+    "password": "",
+    "index":    "cribl-onboarding-requests",
+    "skip_ssl": false,
+    "timeout":  30
+  }
+}

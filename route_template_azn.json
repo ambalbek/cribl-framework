@@ -1,0 +1,15 @@
+{
+  "id": "app0002",
+  "name": "hcsc-blob-storage-northcentralus-route-app0002",
+  "final": false,
+  "disabled": false,
+  "pipeline": "passthru",
+  "description": "",
+  "enableOutputExpression": false,
+  "filter": "apmId == \"app0002\"",
+  "clones": [
+    {}
+  ],
+  "output": "hcsc-blob-storage-northcentralus-app0002",
+  "groupId": "M1H5H8"
+}

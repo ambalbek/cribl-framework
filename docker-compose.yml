@@ -1,0 +1,16 @@
+services:
+  cribl-framework:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "0.0.0.0:5000:5000"     # bind on all interfaces — lock down with firewall to bastion IP only
+    volumes:
+      - ./config.json:/app/config.json:ro          # secrets never in image
+      - ./cribl_snapshots:/app/cribl_snapshots     # persist snapshots across restarts
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s

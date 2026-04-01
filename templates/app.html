@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cribl Framework — Pusher</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #0f1117;
+      --surface: #1a1d27;
+      --border:  #2e3148;
+      --accent:  #ff4b4b;
+      --accent2: #0ea5e9;
+      --text:    #e2e8f0;
+      --muted:   #94a3b8;
+      --radius:  8px;
+    }
+
+    body { background: var(--bg); color: var(--text); font-family: "Segoe UI", system-ui, sans-serif; font-size: 15px; line-height: 1.6; }
+
+    /* ── Header ── */
+    header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 64px; }
+    .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.1rem; }
+    .logo-icon { width: 32px; height: 32px; background: var(--accent); border-radius: 6px; display: grid; place-items: center; font-size: 16px; }
+    .badge { font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 600; letter-spacing: .4px; text-transform: uppercase; }
+    .badge-internal { background: #1e3a5f; color: var(--accent2); }
+    .back-btn { color: var(--muted); text-decoration: none; font-size: .9rem; }
+    .back-btn:hover { color: var(--text); }
+
+    /* ── Tab bar ── */
+    .tab-bar { display: flex; border-bottom: 1px solid var(--border); padding: 0 2rem; background: var(--surface); }
+    .tab-btn { background: none; border: none; border-bottom: 2px solid transparent; color: var(--muted); padding: 14px 20px; font-size: .93rem; font-weight: 500; cursor: pointer; transition: color .15s; }
+    .tab-btn.active { color: var(--text); border-bottom-color: var(--accent); }
+    .tab-btn:hover:not(.active) { color: var(--text); }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* ── Two-column layout ── */
+    .app-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; max-width: 1280px; margin: 0 auto; padding: 24px 2rem 48px; }
+    @media (max-width: 860px) { .app-layout { grid-template-columns: 1fr; } }
+
+    /* ── Panel ── */
+    .panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; }
+    .panel-title { font-size: .72rem; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+
+    /* ── Form controls ── */
+    .form-group { margin-bottom: 14px; }
+    .form-group:last-child { margin-bottom: 0; }
+    label { display: block; font-size: .84rem; font-weight: 600; color: var(--muted); margin-bottom: 5px; }
+    input[type="text"],
+    input[type="password"],
+    select {
+      width: 100%; background: var(--bg); border: 1px solid var(--border);
+      color: var(--text); border-radius: var(--radius); padding: 8px 10px;
+      font-size: .87rem; font-family: inherit;
+    }
+    input[type="text"]:focus, input[type="password"]:focus, select:focus { outline: none; border-color: var(--accent2); }
+    input[type="file"] { color: var(--text); font-size: .85rem; }
+    .radio-group, .check-row { display: flex; gap: 18px; flex-wrap: wrap; }
+    .radio-group label, .check-row label {
+      display: flex; align-items: center; gap: 6px;
+      font-weight: 400; color: var(--text); cursor: pointer; margin: 0;
+    }
+    input[type="radio"], input[type="checkbox"] { accent-color: var(--accent); width: 14px; height: 14px; cursor: pointer; }
+
+    /* ── Worker groups checklist ── */
+    .wg-list { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 8px 10px; max-height: 140px; overflow-y: auto; display: flex; flex-direction: column; gap: 5px; }
+    .wg-list label { display: flex; align-items: center; gap: 8px; font-size: .86rem; color: var(--text); font-weight: 400; cursor: pointer; margin: 0; }
+    .wg-empty { color: var(--muted); font-size: .84rem; font-style: italic; padding: 2px 0; }
+
+    /* ── Collapsible (details/summary) ── */
+    details { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 14px; }
+    summary { padding: 10px 14px; cursor: pointer; font-size: .88rem; font-weight: 600; user-select: none; list-style: none; display: flex; align-items: center; gap: 6px; }
+    summary::-webkit-details-marker { display: none; }
+    summary::before { content: "▶"; font-size: .7rem; color: var(--muted); transition: transform .2s; }
+    details[open] summary::before { transform: rotate(90deg); }
+    summary:hover { color: var(--accent2); }
+    .details-body { padding: 14px 16px; border-top: 1px solid var(--border); }
+
+    /* ── Two-col grid inside panels ── */
+    .col-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    /* ── Divider ── */
+    hr { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+
+    /* ── Buttons ── */
+    .btn-primary { width: 100%; background: var(--accent); color: #fff; border: none; padding: 11px; border-radius: var(--radius); font-size: .95rem; font-weight: 700; cursor: pointer; transition: opacity .15s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .btn-primary:hover:not(:disabled) { opacity: .85; }
+    .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* ── Alerts ── */
+    .alert { border-radius: var(--radius); padding: 10px 14px; font-size: .87rem; margin-bottom: 12px; }
+    .alert-warning { background: rgba(245,158,11,.1); border: 1px solid rgba(245,158,11,.3); color: #fcd34d; }
+    .alert-error   { background: rgba(255,75,75,.1);  border: 1px solid rgba(255,75,75,.3);  color: #f87171; }
+    .alert-success { background: rgba(34,197,94,.1);  border: 1px solid rgba(34,197,94,.3);  color: #4ade80; }
+
+    /* ── Output panel ── */
+    .output-sticky { position: sticky; top: 16px; }
+    .output-pre {
+      background: #0d0f18; border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 14px 16px; font-size: .81rem; font-family: "Cascadia Code","Fira Code",Consolas,monospace;
+      white-space: pre-wrap; word-break: break-word; min-height: 220px; max-height: 65vh;
+      overflow-y: auto; color: var(--text); line-height: 1.65;
+    }
+    .cmd-block { background: #0d0f18; border: 1px solid var(--border); border-radius: var(--radius); padding: 8px 12px; font-size: .78rem; font-family: monospace; color: var(--muted); word-break: break-all; margin-bottom: 10px; }
+    .cmd-label { font-size: .75rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+
+    /* ── Spinner ── */
+    .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: spin .65s linear infinite; flex-shrink: 0; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Misc ── */
+    .hidden { display: none !important; }
+    .hint { font-size: .82rem; color: var(--muted); margin-bottom: 8px; }
+    code { font-family: "Cascadia Code","Fira Code",Consolas,monospace; font-size: .9em; }
+
+    /* ── Footer ── */
+    footer { text-align: center; padding: 24px; color: var(--muted); font-size: .82rem; border-top: 1px solid var(--border); }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">📡</div>
+    Cribl Pusher
+    <span class="badge badge-internal">Internal</span>
+  </div>
+  <a class="back-btn" href="{{ url_for('landing') }}">← Back to Framework</a>
+</header>
+
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab(event,'tab1')">📡 Cribl Pusher</button>
+  <button class="tab-btn"        onclick="switchTab(event,'tab2')">⚡ ELK Roles + Cribl Routes</button>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     TAB 1 — Cribl Pusher
+     ════════════════════════════════════════════════════════════ -->
+<div id="tab1" class="tab-content active">
+  <div class="app-layout">
+
+    <!-- LEFT: Form -->
+    <div>
+
+      <!-- Workspace -->
+      <div class="panel">
+        <p class="panel-title">Workspace</p>
+
+        {% set cribl_urls = config.get('cribl_urls', []) %}
+        <div class="form-group">
+          <label for="t1_cribl_url">Cribl URL <span style="font-weight:400">(optional — overrides config.json)</span></label>
+          {% if cribl_urls %}
+            <select id="t1_cribl_url">
+              {% for u in cribl_urls %}<option value="{{ u }}">{{ u }}</option>{% endfor %}
+            </select>
+          {% else %}
+            <input type="text" id="t1_cribl_url" placeholder="leave blank to use config.json">
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label for="t1_workspace">Workspace</label>
+          <select id="t1_workspace" onchange="onWorkspaceChange('t1')">
+            {% for name, ws in workspaces.items() %}
+            <option value="{{ name }}"
+              data-protected="{{ 'true' if ws.get('require_allow') else 'false' }}">
+              {{ name }}{% if ws.get('description') %}  —  {{ ws.description }}{% endif %}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Worker Group(s) <span style="font-weight:400">(select one or more)</span></label>
+          <div id="t1_wg_list" class="wg-list">
+            <span class="wg-empty">Select a workspace first</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Region</label>
+          <div class="radio-group">
+            <label><input type="radio" name="t1_region" value="azn" checked> azn</label>
+            <label><input type="radio" name="t1_region" value="azs"> azs</label>
+          </div>
+        </div>
+
+        <div id="t1_protected_warning" class="alert alert-warning hidden">
+          ⚠️ <strong>Protected workspace.</strong> You must check the box below before running.
+          <div style="margin-top:8px">
+            <label style="display:flex;align-items:center;gap:6px;color:var(--text);font-weight:500">
+              <input type="checkbox" id="t1_allow_prod"> Allow production writes
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Portal Request ID (for auto status update) -->
+      <div class="panel">
+        <p class="panel-title">Portal Request</p>
+        <div class="form-group">
+          <label for="t1_request_id">Request ID <span style="font-weight:400">(auto-updates status to "done" on success)</span></label>
+          <input type="text" id="t1_request_id" placeholder="e.g. REQ-20260327-A1B2C3D4 — leave blank to skip status update">
+        </div>
+      </div>
+
+      <!-- App Input -->
+      <div class="panel">
+        <p class="panel-title">App Input</p>
+
+        <div class="form-group">
+          <div class="radio-group">
+            <label><input type="radio" name="t1_mode" value="single" checked onchange="onModeChange('t1','single')"> Single App</label>
+            <label><input type="radio" name="t1_mode" value="bulk"          onchange="onModeChange('t1','bulk')">   Bulk File</label>
+          </div>
+        </div>
+
+        <div id="t1_single_inputs">
+          <div class="col-2">
+            <div class="form-group">
+              <label for="t1_appid">APMID</label>
+              <input type="text" id="t1_appid" placeholder="APP001">
+            </div>
+            <div class="form-group">
+              <label for="t1_appname">Appname</label>
+              <input type="text" id="t1_appname" placeholder="My Application">
+            </div>
+          </div>
+        </div>
+
+        <div id="t1_bulk_inputs" class="hidden">
+          <p class="hint">One entry per line: <code>appid, appname</code> — lines starting with <code>#</code> are ignored.</p>
+          <div class="form-group">
+            <label for="t1_appfile">App list (.txt)</label>
+            <input type="file" id="t1_appfile" accept=".txt">
+          </div>
+          <div id="t1_file_info" style="font-size:.82rem;color:var(--muted)"></div>
+        </div>
+      </div>
+
+      <!-- Options -->
+      <div class="panel">
+        <p class="panel-title">Options</p>
+
+        <div class="col-2">
+          <div>
+            <div class="form-group">
+              <div class="check-row">
+                <label><input type="checkbox" id="t1_dry_run" checked> Dry Run (no writes)</label>
+              </div>
+            </div>
+            <div class="form-group">
+              <div class="check-row">
+                <label><input type="checkbox" id="t1_skip_ssl"> Skip SSL Verification</label>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="t1_log_level">Log Level</label>
+            <select id="t1_log_level">
+              <option>INFO</option><option>DEBUG</option><option>WARNING</option><option>ERROR</option>
+            </select>
+          </div>
+        </div>
+
+        <details>
+          <summary>Credentials override</summary>
+          <div class="details-body">
+            <p class="hint">Leave blank to fall back to config.json</p>
+            <div class="form-group">
+              <label for="t1_token">Bearer Token</label>
+              <input type="password" id="t1_token" placeholder="leave blank to use config.json">
+            </div>
+            <p style="color:var(--muted);font-size:.84rem;margin:-2px 0 10px">— or username / password —</p>
+            <div class="col-2">
+              <div class="form-group">
+                <label for="t1_username">Username</label>
+                <input type="text" id="t1_username">
+              </div>
+              <div class="form-group">
+                <label for="t1_password">Password</label>
+                <input type="password" id="t1_password">
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <details>
+          <summary>Advanced Options</summary>
+          <div class="details-body">
+            <div class="form-group">
+              <label for="t1_group_id">Route Group ID</label>
+              <input type="text" id="t1_group_id" placeholder="leave blank for top-level routes">
+            </div>
+            <div class="form-group">
+              <label style="font-weight:400;color:var(--text)">
+                <input type="checkbox" id="t1_create_missing_group"> Create group if missing
+              </label>
+            </div>
+            <div class="form-group">
+              <label for="t1_group_name">Group Display Name</label>
+              <input type="text" id="t1_group_name" placeholder="used only when creating a missing group">
+            </div>
+            <hr>
+            <p class="hint">Safety overrides — leave blank for config.json defaults</p>
+            <div class="col-2">
+              <div class="form-group">
+                <label for="t1_min_routes">Min Existing Total Routes</label>
+                <input type="text" id="t1_min_routes" placeholder="{{ config.get('min_existing_total_routes', 1) }}">
+              </div>
+              <div class="form-group">
+                <label for="t1_diff_lines">Diff Context Lines</label>
+                <input type="text" id="t1_diff_lines" placeholder="{{ config.get('diff_lines', 3) }}">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="t1_snapshot_dir">Snapshot Directory</label>
+              <input type="text" id="t1_snapshot_dir" placeholder="{{ config.get('snapshot_dir', 'cribl_snapshots') }}">
+            </div>
+            <div class="form-group">
+              <label for="t1_log_file">Log File Path (appended)</label>
+              <input type="text" id="t1_log_file" placeholder="e.g. run.log">
+            </div>
+          </div>
+        </details>
+
+        <button class="btn-primary" id="t1_run_btn" onclick="submitPusher()">
+          Run cribl-pusher
+        </button>
+      </div>
+    </div>
+
+    <!-- RIGHT: Output -->
+    <div>
+      <div class="panel output-sticky">
+        <p class="panel-title">Output</p>
+        <div id="t1_status"></div>
+        <div id="t1_commands"></div>
+        <pre id="t1_output" class="output-pre"># Output will appear here after you click Run...</pre>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     TAB 2 — ELK Roles + Cribl
+     ════════════════════════════════════════════════════════════ -->
+<div id="tab2" class="tab-content">
+  <div class="app-layout">
+
+    <!-- LEFT: Form -->
+    <div>
+
+      <!-- App Input -->
+      <div class="panel">
+        <p class="panel-title">App Input</p>
+
+        <div class="form-group">
+          <div class="radio-group">
+            <label><input type="radio" name="t2_mode" value="single" checked onchange="onModeChange('t2','single')"> Single App</label>
+            <label><input type="radio" name="t2_mode" value="bulk"          onchange="onModeChange('t2','bulk')">   Bulk File</label>
+          </div>
+        </div>
+
+        <div id="t2_single_inputs">
+          <div class="col-2">
+            <div class="form-group">
+              <label for="t2_apmid">APMID</label>
+              <input type="text" id="t2_apmid" placeholder="app00001234">
+            </div>
+            <div class="form-group">
+              <label for="t2_app_name">Appname</label>
+              <input type="text" id="t2_app_name" placeholder="my-application">
+            </div>
+          </div>
+        </div>
+
+        <div id="t2_bulk_inputs" class="hidden">
+          <p class="hint">One entry per line: <code>appid, appname</code> — lines starting with <code>#</code> are ignored.</p>
+          <div class="form-group">
+            <label for="t2_appfile">App list (.txt)</label>
+            <input type="file" id="t2_appfile" accept=".txt">
+          </div>
+        </div>
+      </div>
+
+      <!-- Portal Request ID (for auto status update) -->
+      <div class="panel">
+        <p class="panel-title">Portal Request</p>
+        <div class="form-group">
+          <label for="t2_request_id">Request ID <span style="font-weight:400">(auto-updates status to "done" on success)</span></label>
+          <input type="text" id="t2_request_id" placeholder="e.g. REQ-20260327-A1B2C3D4 — leave blank to skip status update">
+        </div>
+      </div>
+
+      <!-- ELK Nonprod -->
+      <div class="panel">
+        <p class="panel-title">ELK Connection — Nonprod</p>
+
+        {% set elk_urls_nonprod = config.get('elk_urls_nonprod', config.get('elk_urls', [])) %}
+        <div class="form-group">
+          <label for="t2_elk_url_nonprod">ELK Nonprod URL</label>
+          {% if elk_urls_nonprod %}
+            <select id="t2_elk_url_nonprod">
+              {% for u in elk_urls_nonprod %}<option value="{{ u }}">{{ u }}</option>{% endfor %}
+            </select>
+          {% else %}
+            <input type="text" id="t2_elk_url_nonprod" placeholder="https://elk-nonprod.example.com">
+          {% endif %}
+        </div>
+        <div class="form-group">
+          <label for="t2_elk_token_nonprod">ELK Nonprod Token <span style="font-weight:400">(overrides user/pass if set)</span></label>
+          <input type="password" id="t2_elk_token_nonprod">
+        </div>
+        <p style="color:var(--muted);font-size:.84rem;margin:-2px 0 10px">— or username / password —</p>
+        <div class="col-2">
+          <div class="form-group">
+            <label for="t2_elk_user_nonprod">Nonprod User</label>
+            <input type="text" id="t2_elk_user_nonprod">
+          </div>
+          <div class="form-group">
+            <label for="t2_elk_password_nonprod">Nonprod Password</label>
+            <input type="password" id="t2_elk_password_nonprod">
+          </div>
+        </div>
+      </div>
+
+      <!-- ELK Prod -->
+      <div class="panel">
+        <p class="panel-title">ELK Connection — Prod</p>
+
+        {% set elk_urls_prod = config.get('elk_urls_prod', config.get('elk_urls', [])) %}
+        <div class="form-group">
+          <label for="t2_elk_url_prod">ELK Prod URL</label>
+          {% if elk_urls_prod %}
+            <select id="t2_elk_url_prod">
+              {% for u in elk_urls_prod %}<option value="{{ u }}">{{ u }}</option>{% endfor %}
+            </select>
+          {% else %}
+            <input type="text" id="t2_elk_url_prod" placeholder="https://elk-prod.example.com">
+          {% endif %}
+        </div>
+        <div class="form-group">
+          <label for="t2_elk_token_prod">ELK Prod Token <span style="font-weight:400">(overrides user/pass if set)</span></label>
+          <input type="password" id="t2_elk_token_prod">
+        </div>
+        <p style="color:var(--muted);font-size:.84rem;margin:-2px 0 10px">— or username / password —</p>
+        <div class="col-2">
+          <div class="form-group">
+            <label for="t2_elk_user_prod">Prod User</label>
+            <input type="text" id="t2_elk_user_prod">
+          </div>
+          <div class="form-group">
+            <label for="t2_elk_password_prod">Prod Password</label>
+            <input type="password" id="t2_elk_password_prod">
+          </div>
+        </div>
+      </div>
+
+      <!-- Cribl Workspace -->
+      <div class="panel">
+        <p class="panel-title">Cribl Workspace</p>
+
+        {% set cribl_urls = config.get('cribl_urls', []) %}
+        <div class="form-group">
+          <label for="t2_cribl_url">Cribl URL <span style="font-weight:400">(optional)</span></label>
+          {% if cribl_urls %}
+            <select id="t2_cribl_url">
+              {% for u in cribl_urls %}<option value="{{ u }}">{{ u }}</option>{% endfor %}
+            </select>
+          {% else %}
+            <input type="text" id="t2_cribl_url" placeholder="https://cribl.example.com:9000">
+          {% endif %}
+        </div>
+        <div class="form-group">
+          <label for="t2_workspace">Workspace</label>
+          <select id="t2_workspace" onchange="onWorkspaceChange('t2')">
+            {% for name, ws in workspaces.items() %}
+            <option value="{{ name }}"
+              data-protected="{{ 'true' if ws.get('require_allow') else 'false' }}">
+              {{ name }}{% if ws.get('description') %}  —  {{ ws.description }}{% endif %}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="t2_worker_group">Worker Group</label>
+          <select id="t2_worker_group">
+            <option value="">— select workspace first —</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Region</label>
+          <div class="radio-group">
+            <label><input type="radio" name="t2_region" value="azn" checked> azn</label>
+            <label><input type="radio" name="t2_region" value="azs"> azs</label>
+          </div>
+        </div>
+
+        <div id="t2_protected_warning" class="alert alert-warning hidden">
+          ⚠️ <strong>Protected workspace.</strong> You must check the box below before running.
+          <div style="margin-top:8px">
+            <label style="display:flex;align-items:center;gap:6px;color:var(--text);font-weight:500">
+              <input type="checkbox" id="t2_allow_prod"> Allow production writes
+            </label>
+          </div>
+        </div>
+
+        <details>
+          <summary>Cribl Credentials</summary>
+          <div class="details-body">
+            <p class="hint">Leave blank to fall back to config.json</p>
+            <div class="form-group">
+              <label for="t2_cribl_token">Cribl Bearer Token</label>
+              <input type="password" id="t2_cribl_token" placeholder="leave blank to use config.json">
+            </div>
+            <p style="color:var(--muted);font-size:.84rem;margin:-2px 0 10px">— or username / password —</p>
+            <div class="col-2">
+              <div class="form-group">
+                <label for="t2_cribl_username">Username</label>
+                <input type="text" id="t2_cribl_username">
+              </div>
+              <div class="form-group">
+                <label for="t2_cribl_password">Password</label>
+                <input type="password" id="t2_cribl_password">
+              </div>
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <!-- Options -->
+      <div class="panel">
+        <p class="panel-title">Options</p>
+
+        <div class="col-2">
+          <div>
+            <div class="form-group">
+              <label style="font-weight:400;color:var(--text)">
+                <input type="checkbox" id="t2_dry_run" checked> Dry Run (no writes)
+              </label>
+            </div>
+            <div class="form-group">
+              <label style="font-weight:400;color:var(--text)">
+                <input type="checkbox" id="t2_skip_ssl"> Skip SSL Verification
+              </label>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="t2_log_level">Log Level</label>
+            <select id="t2_log_level">
+              <option>INFO</option><option>DEBUG</option><option>WARNING</option><option>ERROR</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Order</label>
+          <div class="radio-group">
+            <label><input type="radio" name="t2_order" value="elk-first"   checked> ELK first</label>
+            <label><input type="radio" name="t2_order" value="cribl-first">         Cribl first</label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Skip sides</label>
+          <div class="check-row">
+            <label><input type="checkbox" id="t2_skip_elk">   Skip ELK</label>
+            <label><input type="checkbox" id="t2_skip_cribl"> Skip Cribl</label>
+          </div>
+        </div>
+
+        <button class="btn-primary" id="t2_run_btn" onclick="submitRodeRm()">
+          Run rode_rm
+        </button>
+      </div>
+
+    </div>
+
+    <!-- RIGHT: Output -->
+    <div>
+      <div class="panel output-sticky">
+        <p class="panel-title">Output</p>
+        <div id="t2_status"></div>
+        <div id="t2_command"></div>
+        <pre id="t2_output" class="output-pre"># Output will appear here after you click Run...</pre>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer>Cribl Framework — Pusher &nbsp;&middot;&nbsp; Route management for Cribl &amp; ELK</footer>
+
+<!-- ── JavaScript ─────────────────────────────────────────────────────────── -->
+<script>
+// Workspace config injected from server (mirrors config.json workspaces)
+const WORKSPACES = {{ workspaces | tojson }};
+
+// ── Tab switching ──────────────────────────────────────────────────────────
+function switchTab(evt, id) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  evt.currentTarget.classList.add('active');
+}
+
+// ── Workspace change → worker groups + protected warning ──────────────────
+function onWorkspaceChange(prefix) {
+  const sel    = document.getElementById(prefix + '_workspace');
+  const wsName = sel.value;
+  const wsData = WORKSPACES[wsName] || {};
+
+  const groups = wsData.worker_groups || [];
+
+  // Tab 1: checkboxes (multi-select)
+  const wgContainer = document.getElementById(prefix + '_wg_list');
+  if (wgContainer) {
+    if (groups.length === 0) {
+      wgContainer.innerHTML = '<span class="wg-empty">No worker groups defined for this workspace</span>';
+    } else {
+      wgContainer.innerHTML = groups.map(g =>
+        `<label><input type="checkbox" name="${prefix}_wg" value="${g}"> ${g}</label>`
+      ).join('');
+    }
+  }
+
+  // Tab 2: single select dropdown
+  const wgSelect = document.getElementById(prefix + '_worker_group');
+  if (wgSelect) {
+    wgSelect.innerHTML = groups.length === 0
+      ? '<option value="">No worker groups defined</option>'
+      : groups.map(g => `<option value="${g}">${g}</option>`).join('');
+  }
+
+  // Protected workspace warning
+  const warn = document.getElementById(prefix + '_protected_warning');
+  if (warn) {
+    const isProtected = !!wsData.require_allow;
+    warn.classList.toggle('hidden', !isProtected);
+    if (!isProtected) {
+      const cb = document.getElementById(prefix + '_allow_prod');
+      if (cb) cb.checked = false;
+    }
+  }
+}
+
+// ── Mode toggle ───────────────────────────────────────────────────────────
+function onModeChange(prefix, mode) {
+  document.getElementById(prefix + '_single_inputs').classList.toggle('hidden', mode !== 'single');
+  document.getElementById(prefix + '_bulk_inputs').classList.toggle('hidden',  mode !== 'bulk');
+}
+
+// ── File preview ──────────────────────────────────────────────────────────
+document.getElementById('t1_appfile').addEventListener('change', function () {
+  const file = this.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const lines = e.target.result.split('\n')
+      .filter(l => l.trim() && !l.trim().startsWith('#'));
+    document.getElementById('t1_file_info').textContent =
+      `${lines.length} app(s) found. Preview: ${lines.slice(0, 3).join(' | ')}${lines.length > 3 ? ' ...' : ''}`;
+  };
+  reader.readAsText(file);
+});
+
+// ── Helper: set button loading state ─────────────────────────────────────
+function setLoading(btnId, label, loading) {
+  const btn = document.getElementById(btnId);
+  btn.disabled = loading;
+  btn.innerHTML = loading
+    ? `<span class="spinner"></span> Running...`
+    : label;
+}
+
+// ── Helper: render status banner ──────────────────────────────────────────
+function renderStatus(elId, returncode) {
+  const el = document.getElementById(elId);
+  el.innerHTML = returncode === 0
+    ? `<div class="alert alert-success">✓ Completed successfully (exit code 0).</div>`
+    : `<div class="alert alert-error">✗ Finished with errors (exit code ${returncode}).</div>`;
+}
+
+// ── Helper: render validation errors ─────────────────────────────────────
+function renderErrors(elId, errors) {
+  const el = document.getElementById(elId);
+  el.innerHTML = errors.map(e => `<div class="alert alert-error">❌ ${e}</div>`).join('');
+}
+
+// ── Helper: escape HTML ───────────────────────────────────────────────────
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── Submit Tab 1 — Cribl Pusher ───────────────────────────────────────────
+async function submitPusher() {
+  const statusEl  = document.getElementById('t1_status');
+  const cmdsEl    = document.getElementById('t1_commands');
+  const outputEl  = document.getElementById('t1_output');
+
+  const wgs  = [...document.querySelectorAll('input[name="t1_wg"]:checked')].map(c => c.value);
+  const mode = document.querySelector('input[name="t1_mode"]:checked').value;
+
+  const fd = new FormData();
+  fd.append('mode',       mode);
+  fd.append('request_id', document.getElementById('t1_request_id').value);
+  fd.append('workspace',  document.getElementById('t1_workspace').value);
+  fd.append('region',     document.querySelector('input[name="t1_region"]:checked').value);
+  fd.append('log_level',  document.getElementById('t1_log_level').value);
+  fd.append('cribl_url',  document.getElementById('t1_cribl_url').value || '');
+
+  wgs.forEach(wg => fd.append('worker_groups', wg));
+
+  if (document.getElementById('t1_allow_prod').checked) fd.append('allow_prod', '1');
+  if (document.getElementById('t1_dry_run').checked)    fd.append('dry_run',    '1');
+  if (document.getElementById('t1_skip_ssl').checked)   fd.append('skip_ssl',   '1');
+
+  if (mode === 'single') {
+    fd.append('appid',   document.getElementById('t1_appid').value);
+    fd.append('appname', document.getElementById('t1_appname').value);
+  } else {
+    const f = document.getElementById('t1_appfile').files[0];
+    if (f) fd.append('appfile', f);
+  }
+
+  fd.append('token',    document.getElementById('t1_token').value);
+  fd.append('username', document.getElementById('t1_username').value);
+  fd.append('password', document.getElementById('t1_password').value);
+  fd.append('group_id', document.getElementById('t1_group_id').value);
+  if (document.getElementById('t1_create_missing_group').checked)
+    fd.append('create_missing_group', '1');
+  fd.append('group_name',   document.getElementById('t1_group_name').value);
+  fd.append('min_routes',   document.getElementById('t1_min_routes').value);
+  fd.append('diff_lines',   document.getElementById('t1_diff_lines').value);
+  fd.append('snapshot_dir', document.getElementById('t1_snapshot_dir').value);
+  fd.append('log_file',     document.getElementById('t1_log_file').value);
+
+  statusEl.innerHTML = '';
+  cmdsEl.innerHTML   = '';
+  outputEl.textContent = 'Running...';
+  setLoading('t1_run_btn', 'Run cribl-pusher', true);
+
+  try {
+    const res  = await fetch('/cribl/api/run-pusher', { method: 'POST', body: fd });
+    const data = await res.json();
+
+    if (res.status === 400) {
+      renderErrors('t1_status', data.errors);
+      outputEl.textContent = '';
+    } else {
+      if (data.commands && data.commands.length) {
+        cmdsEl.innerHTML = data.commands.map(c =>
+          `<div class="cmd-label">${esc(c.wg)}</div><div class="cmd-block">${esc(c.cmd)}</div>`
+        ).join('');
+      }
+      outputEl.textContent = data.output || '(no output)';
+      renderStatus('t1_status', data.returncode);
+      if (data.portal_update) {
+        const pu = data.portal_update;
+        if (pu.ok) {
+          statusEl.innerHTML += `<div class="alert alert-success">Portal request status updated to "done" (${pu.updated} doc(s) updated).</div>`;
+        } else if (pu.skipped) {
+          statusEl.innerHTML += `<div class="alert alert-warning">Portal status update skipped: ${esc(pu.reason)}</div>`;
+        } else {
+          statusEl.innerHTML += `<div class="alert alert-error">Portal status update failed: ${esc(pu.error || pu.body || 'unknown')}</div>`;
+        }
+      }
+    }
+  } catch (err) {
+    statusEl.innerHTML = `<div class="alert alert-error">❌ Request failed: ${esc(err.message)}</div>`;
+    outputEl.textContent = '';
+  } finally {
+    setLoading('t1_run_btn', 'Run cribl-pusher', false);
+  }
+}
+
+// ── Submit Tab 2 — ELK Roles + Cribl ─────────────────────────────────────
+async function submitRodeRm() {
+  const statusEl = document.getElementById('t2_status');
+  const cmdEl    = document.getElementById('t2_command');
+  const outputEl = document.getElementById('t2_output');
+
+  const mode = document.querySelector('input[name="t2_mode"]:checked').value;
+
+  const fd = new FormData();
+  fd.append('mode', mode);
+  fd.append('request_id', document.getElementById('t2_request_id').value);
+
+  if (mode === 'single') {
+    fd.append('apmid',    document.getElementById('t2_apmid').value);
+    fd.append('app_name', document.getElementById('t2_app_name').value);
+  } else {
+    const f = document.getElementById('t2_appfile').files[0];
+    if (f) fd.append('appfile', f);
+  }
+
+  fd.append('elk_url_nonprod',      document.getElementById('t2_elk_url_nonprod').value      || '');
+  fd.append('elk_token_nonprod',    document.getElementById('t2_elk_token_nonprod').value);
+  fd.append('elk_user_nonprod',     document.getElementById('t2_elk_user_nonprod').value);
+  fd.append('elk_password_nonprod', document.getElementById('t2_elk_password_nonprod').value);
+  fd.append('elk_url_prod',         document.getElementById('t2_elk_url_prod').value         || '');
+  fd.append('elk_token_prod',       document.getElementById('t2_elk_token_prod').value);
+  fd.append('elk_user_prod',        document.getElementById('t2_elk_user_prod').value);
+  fd.append('elk_password_prod',    document.getElementById('t2_elk_password_prod').value);
+  fd.append('cribl_url',            document.getElementById('t2_cribl_url').value            || '');
+  fd.append('cribl_token',          document.getElementById('t2_cribl_token').value);
+  fd.append('cribl_username',       document.getElementById('t2_cribl_username').value);
+  fd.append('cribl_password',       document.getElementById('t2_cribl_password').value);
+  fd.append('workspace',    document.getElementById('t2_workspace').value);
+  fd.append('worker_group', document.getElementById('t2_worker_group').value);
+  fd.append('region',       document.querySelector('input[name="t2_region"]:checked').value);
+  fd.append('log_level',    document.getElementById('t2_log_level').value);
+  fd.append('order',        document.querySelector('input[name="t2_order"]:checked').value);
+
+  if (document.getElementById('t2_allow_prod').checked)  fd.append('allow_prod',  '1');
+  if (document.getElementById('t2_skip_elk').checked)    fd.append('skip_elk',    '1');
+  if (document.getElementById('t2_skip_cribl').checked)  fd.append('skip_cribl',  '1');
+  if (document.getElementById('t2_dry_run').checked)     fd.append('dry_run',     '1');
+  if (document.getElementById('t2_skip_ssl').checked)    fd.append('skip_ssl',    '1');
+
+  statusEl.innerHTML   = '';
+  cmdEl.innerHTML      = '';
+  outputEl.textContent = 'Running...';
+  setLoading('t2_run_btn', 'Run rode_rm', true);
+
+  try {
+    const res  = await fetch('/cribl/api/run-rode-rm', { method: 'POST', body: fd });
+    const data = await res.json();
+
+    if (res.status === 400) {
+      renderErrors('t2_status', data.errors);
+      outputEl.textContent = '';
+    } else {
+      if (data.command) {
+        cmdEl.innerHTML = `<div class="cmd-label">Command</div><div class="cmd-block">${esc(data.command)}</div>`;
+      }
+      outputEl.textContent = data.output || '(no output)';
+      renderStatus('t2_status', data.returncode);
+      if (data.portal_update) {
+        const pu = data.portal_update;
+        if (pu.ok) {
+          statusEl.innerHTML += `<div class="alert alert-success">Portal request status updated to "done" (${pu.updated} doc(s) updated).</div>`;
+        } else if (pu.skipped) {
+          statusEl.innerHTML += `<div class="alert alert-warning">Portal status update skipped: ${esc(pu.reason)}</div>`;
+        } else {
+          statusEl.innerHTML += `<div class="alert alert-error">Portal status update failed: ${esc(pu.error || pu.body || 'unknown')}</div>`;
+        }
+      }
+    }
+  } catch (err) {
+    statusEl.innerHTML = `<div class="alert alert-error">❌ Request failed: ${esc(err.message)}</div>`;
+    outputEl.textContent = '';
+  } finally {
+    setLoading('t2_run_btn', 'Run rode_rm', false);
+  }
+}
+
+// ── Init on page load ─────────────────────────────────────────────────────
+onWorkspaceChange('t1');
+onWorkspaceChange('t2');
+</script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "_comment": "Apply this role in Kibana → Stack Management → Roles, or via the ELK API:",
+  "_comment_api": "PUT /_security/role/cribl-portal-admin",
+
+  "cluster": [],
+  "indices": [
+    {
+      "names": ["logs-cribl-onboarding-requests"],
+      "privileges": ["read", "write", "view_index_metadata"]
+    }
+  ],
+
+  "_comment_datastream": "Data streams are append-only by default. Run this once to allow _update_by_query:",
+  "_comment_curl": "PUT /logs-cribl-onboarding-requests/_settings  { \"index.blocks.write\": false }"
+}

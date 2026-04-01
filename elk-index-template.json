@@ -1,0 +1,26 @@
+{
+  "index_patterns": ["cribl-onboarding-requests*"],
+  "priority": 100,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 1
+    },
+    "mappings": {
+      "dynamic": "strict",
+      "properties": {
+        "@timestamp":         { "type": "date" },
+        "request_id":         { "type": "keyword" },
+        "lan_id":             { "type": "keyword" },
+        "requester_name":     { "type": "keyword" },
+        "apmid":              { "type": "keyword" },
+        "appname":            { "type": "keyword" },
+        "region":             { "type": "keyword" },
+        "log_destinations":   { "type": "keyword" },
+        "log_types":          { "type": "keyword" },
+        "entitlement_groups": { "type": "keyword" },
+        "status":             { "type": "keyword" }
+      }
+    }
+  }
+}

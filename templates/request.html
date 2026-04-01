@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cribl Framework — Onboarding Portal</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #f8fafc;
+      --surface: #ffffff;
+      --border:  #e2e8f0;
+      --accent:  #e53e3e;
+      --accent2: #0284c7;
+      --text:    #1e293b;
+      --muted:   #64748b;
+      --success: #16a34a;
+      --radius:  8px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logo-icon {
+      width: 32px; height: 32px;
+      background: var(--accent);
+      border-radius: 6px;
+      display: grid;
+      place-items: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+    .logo-text { font-weight: 700; font-size: 1.05rem; }
+    .badge {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-weight: 600;
+      letter-spacing: .4px;
+      text-transform: uppercase;
+      background: #e0f2fe;
+      color: var(--accent2);
+    }
+
+    /* ── Main ── */
+    main {
+      flex: 1;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 48px 1rem 80px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 36px 40px;
+      width: 100%;
+      max-width: 560px;
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+    .card-title span { color: var(--accent); }
+
+    .card-sub {
+      color: var(--muted);
+      font-size: .9rem;
+      margin-bottom: 28px;
+    }
+
+    /* ── Form ── */
+    .form-group { margin-bottom: 20px; }
+    label {
+      display: block;
+      font-size: .84rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .required-star { color: var(--accent); margin-left: 2px; }
+
+    input[type="text"]:not(.tag-text-input) {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      font-size: .9rem;
+      font-family: inherit;
+      transition: border-color .15s;
+    }
+    input[type="text"]:not(.tag-text-input):focus {
+      outline: none;
+      border-color: var(--accent2);
+    }
+
+    /* ── Region radio ── */
+    .region-group {
+      display: flex;
+      gap: 12px;
+    }
+    .region-option {
+      flex: 1;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: border-color .15s, background .15s;
+      font-size: .9rem;
+    }
+    .region-option:has(input:checked) {
+      border-color: var(--accent);
+      background: rgba(255,75,75,.06);
+    }
+    .region-option input { accent-color: var(--accent); cursor: pointer; }
+
+    /* ── Groups tag input ── */
+    .tag-input-wrap {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 8px 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+      cursor: text;
+      transition: border-color .15s;
+      min-height: 46px;
+    }
+    .tag-input-wrap:focus-within { border-color: var(--accent2); }
+    .tag {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: #e0f2fe;
+      border: 1px solid #bae6fd;
+      color: #0369a1;
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-size: .83rem;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .tag-remove {
+      background: none;
+      border: none;
+      color: #0369a1;
+      cursor: pointer;
+      font-size: .85rem;
+      padding: 0;
+      line-height: 1;
+      opacity: .7;
+    }
+    .tag-remove:hover { opacity: 1; }
+    .tag-text-input {
+      background: none;
+      border: none;
+      color: var(--text);
+      font-size: .88rem;
+      font-family: inherit;
+      outline: none;
+      flex: 1;
+      min-width: 160px;
+      padding: 2px 4px;
+    }
+    .tag-hint {
+      font-size: .8rem;
+      color: var(--muted);
+      margin-top: 5px;
+    }
+
+    /* ── Error list ── */
+    .error-box {
+      background: rgba(255,75,75,.08);
+      border: 1px solid rgba(255,75,75,.3);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      margin-bottom: 18px;
+      display: none;
+    }
+    .error-box.visible { display: block; }
+    .error-box ul { padding-left: 18px; }
+    .error-box li { color: #b91c1c; font-size: .87rem; }
+
+    /* ── Submit button ── */
+    .btn-submit {
+      width: 100%;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 12px;
+      border-radius: var(--radius);
+      font-size: .95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity .15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .btn-submit:hover:not(:disabled) { opacity: .85; }
+    .btn-submit:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* ── Spinner ── */
+    .spinner {
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .65s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Success state ── */
+    .success-card {
+      text-align: center;
+      display: none;
+    }
+    .success-card.visible { display: block; }
+    .success-icon {
+      width: 64px; height: 64px;
+      background: #dcfce7;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      margin: 0 auto 20px;
+    }
+    .success-card h2 {
+      font-size: 1.2rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .success-card p {
+      color: var(--muted);
+      font-size: .9rem;
+      margin-bottom: 24px;
+    }
+    .request-id-box {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .request-id-label {
+      font-size: .75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    .request-id-value {
+      font-family: "Cascadia Code", "Fira Code", Consolas, monospace;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--accent2);
+    }
+    .copy-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: .82rem;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: color .15s, border-color .15s;
+    }
+    .copy-btn:hover { color: var(--text); border-color: var(--muted); }
+
+    .btn-another {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 24px;
+      border-radius: var(--radius);
+      font-size: .9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: border-color .15s;
+    }
+    .btn-another:hover { border-color: var(--muted); }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 24px;
+      color: var(--muted);
+      font-size: .82rem;
+      border-top: 1px solid var(--border);
+    }
+
+    @media (max-width: 600px) {
+      .card { padding: 28px 20px; }
+      .region-group { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-icon">📡</div>
+  <span class="logo-text"><a href="/" style="color:inherit;text-decoration:none">Cribl Framework</a></span>
+  <span class="badge">Onboarding</span>
+</header>
+
+<main>
+  <div class="card">
+
+    <!-- ── Form state ── -->
+    <div id="form-state">
+      <p class="card-title">Submit an <span>Onboarding Request</span></p>
+      <p class="card-sub">Fill in your application details. Your request will be reviewed and processed by the platform team.</p>
+
+      <div id="error-box" class="error-box" role="alert">
+        <ul id="error-list"></ul>
+      </div>
+
+      <div class="form-group">
+        <label for="lan_id">lanId <span class="required-star">*</span></label>
+        <input type="text" id="lan_id" placeholder="lanId" autocomplete="off" />
+      </div>
+
+      <div class="form-group">
+        <label for="requester_name">Name / Last Name <span class="required-star">*</span></label>
+        <input type="text" id="requester_name" placeholder="Full Name" autocomplete="off" />
+      </div>
+
+      <div class="form-group">
+        <label for="apmid">APM ID <span class="required-star">*</span></label>
+        <input type="text" id="apmid" placeholder="e.g. APP001" autocomplete="off" />
+      </div>
+
+      <div class="form-group">
+        <label for="appname">App Name <span class="required-star">*</span></label>
+        <input type="text" id="appname" placeholder="e.g. payments_service" autocomplete="off" />
+        <p class="tag-hint">Must be a single word using underscores instead of spaces — e.g. <strong>payments_service</strong></p>
+      </div>
+
+      <div class="form-group">
+        <label>Region <span class="required-star">*</span></label>
+        <div class="region-group">
+          <label class="region-option">
+            <input type="radio" name="region" value="azn" checked />
+            <span>azn — Azure North</span>
+          </label>
+          <label class="region-option">
+            <input type="radio" name="region" value="azs" />
+            <span>azs — Azure South</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Log Destination <span class="required-star">*</span></label>
+        <div class="region-group" style="flex-wrap:wrap;">
+          <label class="region-option">
+            <input type="checkbox" name="log_dest" value="dynatrace" />
+            <span>Dynatrace</span>
+          </label>
+          <label class="region-option">
+            <input type="checkbox" name="log_dest" value="elk" />
+            <span>ELK</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Log Type <span class="required-star">*</span></label>
+        <div class="region-group" style="flex-wrap:wrap;">
+          <label class="region-option">
+            <input type="checkbox" name="log_type" value="application_logs" />
+            <span>Application Logs</span>
+          </label>
+          <label class="region-option">
+            <input type="checkbox" name="log_type" value="metrics" />
+            <span>Metrics</span>
+          </label>
+        </div>
+      </div>
+
+      <div style="background:rgba(14,165,233,.08);border:1px solid rgba(14,165,233,.25);border-radius:var(--radius);padding:10px 14px;margin-bottom:20px;font-size:.87rem;color:var(--accent2);">
+        {% if iiq_url %}Submit your IIQ request at <strong><a href="{{ iiq_url }}" target="_blank">{{ iiq_url }}</a></strong> for all your entitlements{% endif %}
+      </div>
+
+      <div class="form-group">
+        <label>Entitlement Groups <span class="required-star">*</span></label>
+        <div class="tag-input-wrap" id="tag-wrap" onclick="document.getElementById('tag-input').focus()">
+          <input
+            type="text"
+            id="tag-input"
+            class="tag-text-input"
+            placeholder="Type a group name and press Enter or comma"
+            autocomplete="off"
+          />
+        </div>
+        <p class="tag-hint">Press <strong>Enter</strong> or <strong>,</strong> to add each group. Click <strong>×</strong> to remove a group.</p>
+      </div>
+
+      <button class="btn-submit" id="submit-btn" onclick="submitForm()">
+        Submit Request
+      </button>
+    </div>
+
+    <!-- ── Success state ── -->
+    <div id="success-state" class="success-card">
+      <div class="success-icon">✓</div>
+      <h2>Request Submitted</h2>
+      <p>Your request has been received and is pending review by the platform team. Please save your Request ID below.</p>
+
+      <div class="request-id-box">
+        <div>
+          <div class="request-id-label">Request ID</div>
+          <div class="request-id-value" id="request-id-display"></div>
+        </div>
+        <button class="copy-btn" onclick="copyId()">Copy</button>
+      </div>
+
+      <button class="btn-another" onclick="resetForm()">Submit another request</button>
+    </div>
+
+  </div>
+</main>
+
+<footer>
+  Cribl Framework — Onboarding Portal
+</footer>
+
+<script>
+  // ── Tag input ──────────────────────────────────────────────────────────────
+  const tags = [];
+
+  function addTag(value) {
+    const v = value.trim().replace(/,+$/, '').trim();
+    if (!v || tags.includes(v)) return;
+    tags.push(v);
+    renderTags();
+  }
+
+  function removeTag(index) {
+    tags.splice(index, 1);
+    renderTags();
+  }
+
+  function renderTags() {
+    const wrap = document.getElementById('tag-wrap');
+    const input = document.getElementById('tag-input');
+    // Remove existing tag elements, keep the input
+    wrap.querySelectorAll('.tag').forEach(el => el.remove());
+    tags.forEach((t, i) => {
+      const tag = document.createElement('span');
+      tag.className = 'tag';
+      tag.innerHTML = `${esc(t)} <button class="tag-remove" type="button" onclick="removeTag(${i})">×</button>`;
+      wrap.insertBefore(tag, input);
+    });
+    input.placeholder = tags.length ? '' : 'Type a group name and press Enter or comma';
+  }
+
+  document.getElementById('tag-input').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      addTag(this.value);
+      this.value = '';
+    } else if (e.key === 'Backspace' && !this.value && tags.length) {
+      removeTag(tags.length - 1);
+    }
+  });
+
+  document.getElementById('tag-input').addEventListener('blur', function () {
+    if (this.value.trim()) {
+      addTag(this.value);
+      this.value = '';
+    }
+  });
+
+  // ── Submit ─────────────────────────────────────────────────────────────────
+  function submitForm() {
+    const lanId   = document.getElementById('lan_id').value.trim();
+    const reqName = document.getElementById('requester_name').value.trim();
+    const appId   = document.getElementById('apmid').value.trim();
+    const appName = document.getElementById('appname').value.trim();
+    const region  = document.querySelector('input[name="region"]:checked')?.value || '';
+    const logDests = [...document.querySelectorAll('input[name="log_dest"]:checked')].map(c => c.value);
+    const logTypes = [...document.querySelectorAll('input[name="log_type"]:checked')].map(c => c.value);
+
+    const errors = [];
+    if (!lanId)        errors.push('LAN ID is required.');
+    if (!reqName)      errors.push('Name / Last Name is required.');
+    if (!appId)        errors.push('App ID is required.');
+    if (!appName)      errors.push('App Name is required.');
+    if (!region)       errors.push('Select a region.');
+    if (!logDests.length) errors.push('Select at least one log destination.');
+    if (!logTypes.length) errors.push('Select at least one log type.');
+    if (!tags.length)  errors.push('Add at least one entitlement group.');
+
+    const errorBox  = document.getElementById('error-box');
+    const errorList = document.getElementById('error-list');
+
+    if (errors.length) {
+      errorList.innerHTML = errors.map(e => `<li>${e}</li>`).join('');
+      errorBox.classList.add('visible');
+      return;
+    }
+    errorBox.classList.remove('visible');
+
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Submitting…';
+
+    fetch('/portal/api/submit', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ lan_id: lanId, requester_name: reqName, apmid: appId, appname: appName, region, log_destinations: logDests, log_types: logTypes, groups: tags }),
+    })
+    .then(res => {
+      console.log('[portal] submit response — status:', res.status, 'url:', res.url);
+      return res.json().then(data => ({ status: res.status, data }));
+    })
+    .then(({ status, data }) => {
+      if (data.errors) {
+        console.error('[portal] server errors:', data.errors);
+        errorList.innerHTML = data.errors.map(e => `<li>${e}</li>`).join('');
+        errorBox.classList.add('visible');
+        btn.disabled = false;
+        btn.innerHTML = 'Submit Request';
+      } else {
+        document.getElementById('request-id-display').textContent = data.request_id;
+        document.getElementById('form-state').style.display = 'none';
+        document.getElementById('success-state').classList.add('visible');
+      }
+    })
+    .catch(err => {
+      console.error('[portal] fetch failed:', err);
+      errorList.innerHTML = `<li>Request failed: ${err.message} — check browser console for details.</li>`;
+      errorBox.classList.add('visible');
+      btn.disabled = false;
+      btn.innerHTML = 'Submit Request';
+    });
+  }
+
+  function copyId() {
+    const id = document.getElementById('request-id-display').textContent;
+    navigator.clipboard.writeText(id).then(() => {
+      const btn = document.querySelector('.copy-btn');
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = 'Copy', 2000);
+    });
+  }
+
+  function resetForm() {
+    document.getElementById('lan_id').value   = '';
+    document.getElementById('requester_name').value = '';
+    document.getElementById('apmid').value   = '';
+    document.getElementById('appname').value = '';
+    document.querySelector('input[name="region"][value="azn"]').checked = true;
+    document.querySelectorAll('input[name="log_dest"]').forEach(c => c.checked = false);
+    document.querySelectorAll('input[name="log_type"]').forEach(c => c.checked = false);
+    tags.length = 0;
+    renderTags();
+    document.getElementById('error-box').classList.remove('visible');
+    document.getElementById('submit-btn').disabled = false;
+    document.getElementById('submit-btn').innerHTML = 'Submit Request';
+    document.getElementById('form-state').style.display = '';
+    document.getElementById('success-state').classList.remove('visible');
+  }
+
+  function esc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+</script>
+</body>
+</html>

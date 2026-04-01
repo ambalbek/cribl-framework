@@ -1,0 +1,48 @@
+# Credentials / config with secrets
+config.json
+
+# Snapshots (rollback files)
+cribl_snapshots/
+
+# ELK template output
+ops_rm_r_templates_output/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+pip-wheel-metadata/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Log files (--log-file output)
+*.log
+
+# Claude
+.claude
+
+# Docker image archives
+*.tar
+images/

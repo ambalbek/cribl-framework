@@ -1,0 +1,8 @@
+{
+  "pipeline": "passthru",
+  "final": false,
+  "disabled": false,
+  "clones": [],
+  "description": "",
+  "enableOutputExpression": false
+}
